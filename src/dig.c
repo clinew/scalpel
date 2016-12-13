@@ -1154,6 +1154,7 @@ int digImageFile(struct scalpelState *state) {
 
   // can't process an image file smaller than the longest needle
   if(filesize <= longestneedle * 2) {
+    fclose(state->infile);
     return SCALPEL_ERROR_FILE_TOO_SMALL;
   }
 
