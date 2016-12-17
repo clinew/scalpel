@@ -1180,16 +1180,6 @@ int digImageFile(struct scalpelState *state) {
 
   fprintf(stdout, "Image file pass 1/2.\n");
 
-  // Create and start the streaming reader thread for this image file.
-  reads_finished = FALSE;
-  pthread_t reader;
-  if(pthread_create(&reader, NULL, streaming_reader, (void *)state) != 0) {
-    return SCALPEL_ERROR_PTHREAD_FAILURE;
-  }
-
-  // wait on reader mutex "reads_begun"
-  
-
 #ifdef GPU_THREADING
 
   // Create and start the gpu_handler for searches on this image.
@@ -1229,6 +1219,15 @@ int digImageFile(struct scalpelState *state) {
 
 #ifdef MULTICORE_THREADING
 
+  // Create and start the streaming reader thread for this image file.
+  reads_finished = FALSE;
+  pthread_t reader;
+  if(pthread_create(&reader, NULL, streaming_reader, (void *)state) != 0) {
+    return SCALPEL_ERROR_PTHREAD_FAILURE;
+  }
+
+  // wait on reader mutex "reads_begun"
+
   // The reader is now reading in chunks of the image. We call digbuffer on
   // these chunks for multi-threaded search. 
 
@@ -1244,6 +1243,8 @@ int digImageFile(struct scalpelState *state) {
     put(empty_readbuf, (void *)rinfo);
   }
 
+#else
+  fclose(state->infile);
 #endif
 
   return SCALPEL_OK;
